@@ -1,0 +1,5 @@
+{
+    "name":"esp_crtp",
+    "expo":["include/*"],
+    "headers":["crtp.h"]
+}
