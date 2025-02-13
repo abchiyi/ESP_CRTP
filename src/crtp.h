@@ -1,27 +1,22 @@
-/**
- *    ||          ____  _ __
+/**    ||          ____  _ __
  * +------+      / __ )(_) /_______________ _____  ___
  * | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
  * +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
  *  ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
  *
- * Crazyflie control firmware
+ * Crazyflie控制固件
  *
- * Copyright (C) 2011-2012 Bitcraze AB
+ * 版权所有 (C) 2011-2012 Bitcraze AB
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, in version 3.
+ * 本程序是自由软件：您可以依据GNU通用公共许可证版本3对其重新分发和/或修改。
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * 本程序是免费分发的，希望它有用，
+ * 但不提供任何保证；不提供关于适销性或特定用途适用性的默示保证。有关更多详细信息，请参阅GNU通用公共许可证。
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * 您应该已经随本程序一起收到了GNU通用公共许可证。
+ * 如果没有，请查看 <http://www.gnu.org/licenses/>。
  *
- * crtp.h - CrazyRealtimeTransferProtocol stack
+ * crtp.h - CrazyRealtimeTransferProtocol堆栈
  */
 
 #ifndef CRTP_H_
@@ -38,34 +33,33 @@
 
 typedef enum
 {
-  CRTP_PORT_CONSOLE = 0x00,
-  CRTP_PORT_PARAM = 0x02,
-  CRTP_PORT_SETPOINT = 0x03,
-  CRTP_PORT_MEM = 0x04,
-  CRTP_PORT_LOG = 0x05,
-  CRTP_PORT_LOCALIZATION = 0x06,
-  CRTP_PORT_SETPOINT_GENERIC = 0x07,
-  CRTP_PORT_SETPOINT_HL = 0x08,
-  CRTP_PORT_PLATFORM = 0x0D,
-  CRTP_PORT_LINK = 0x0F,
+  CRTP_PORT_CONSOLE = 0x00,          //  Console 使用 consoleprintf 函数将调试信息输出到 PC 端。
+  CRTP_PORT_PARAM = 0x02,            // 读写 Crazyflie 参数。参数可在源码中用宏表示。
+  CRTP_PORT_SETPOINT = 0x03,         // 发送 roll/pitch/yaw/thrust 控制指令。
+  CRTP_PORT_MEM = 0x04,              // 访问非易失性存储，如 1 线访问和 I2C 访问。仅支持 Crazyflie 2.0
+  CRTP_PORT_LOG = 0x05,              // 设置日志变量。日志变量将定期发送至 Crazyflie，日志变量在 Crazyflie 源码中用宏表示。
+  CRTP_PORT_LOCALIZATION = 0x06,     // 定位端口，用于接收和处理定位数据
+  CRTP_PORT_SETPOINT_GENERIC = 0x07, // 本地化相关包
+  CRTP_PORT_PLATFORM = 0x0D,         // 用于 misc platform 控制，如调试和掉电等
+  CRTP_PORT_LINK = 0x0F              // 用于控制和访问通信链路层
 } CRTPPort;
 
 typedef struct _CRTPPacket
 {
-  uint8_t size; //< Size of data
+  uint8_t size; //< 数据大小
   union
   {
     struct
     {
       union
       {
-        uint8_t header; //< Header selecting channel and port
+        uint8_t header; //< 选择通道和端口的头部
         struct
         {
 #ifndef CRTP_HEADER_COMPAT
-          uint8_t channel : 2; //< Selected channel within port
+          uint8_t channel : 2; //< 在端口内选择的通道
           uint8_t reserved : 2;
-          uint8_t port : 4; //< Selected port
+          uint8_t port : 4; //< 选择的端口
 #else
           uint8_t channel : 2;
           uint8_t port : 4;
@@ -73,99 +67,94 @@ typedef struct _CRTPPacket
 #endif
         };
       };
-      uint8_t data[CRTP_MAX_DATA_SIZE]; //< Data
+      uint8_t data[CRTP_MAX_DATA_SIZE]; //< 数据
     };
-    uint8_t raw[CRTP_MAX_DATA_SIZE + 1]; //< The full packet "raw"
+    uint8_t raw[CRTP_MAX_DATA_SIZE + 1]; //< 完整的数据包 "原始"
   };
 } __attribute__((packed)) CRTPPacket;
-
-auto a = sizeof(CRTPPacket);
 
 typedef void (*CrtpCallback)(CRTPPacket *);
 
 /**
- * Initialize the CRTP stack
+ * 初始化CRTP堆栈
  */
 void crtpInit(void);
 
 bool crtpTest(void);
 
 /**
- * Initializes the queue and dispatch of an task.
+ * 初始化任务的队列和调度。
  *
- * @param[in] taskId The id of the CRTP task
+ * @param[in] taskId CRTP任务的ID
  */
 void crtpInitTaskQueue(CRTPPort taskId);
 
 /**
- * Register a callback to be called for a particular port.
+ * 注册一个回调函数，用于特定端口。
  *
- * @param[in] port Crtp port for which the callback is set
- * @param[in] cb Callback that will be called when a packet is received on
- *            'port'.
+ * @param[in] port 设置回调的Crtp端口
+ * @param[in] cb 当在'port'上接收到数据包时将调用的回调函数
  *
- * @note Only one callback can be registered per port! The last callback
- *       registered will be the one called
+ * @note 每个端口只能注册一个回调函数！最后注册的回调函数将被调用
  */
 void crtpRegisterPortCB(int port, CrtpCallback cb);
 
 /**
- * Put a packet in the TX task
+ * 将数据包放入TX任务中
  *
- * If the TX stack is full, the oldest lowest priority packet is dropped
+ * 如果TX堆栈满了，最旧的低优先级数据包将被丢弃
  *
- * @param[in] p CRTPPacket to send
+ * @param[in] p 要发送的CRTPPacket
  */
 int crtpSendPacket(CRTPPacket *p);
 
 /**
- * Put a packet in the TX task
+ * 将数据包放入TX任务中
  *
- * If the TX stack is full, the function block until one place is free (Good for console implementation)
+ * 如果TX堆栈满了，函数将阻塞直到有空位（适用于控制台实现）
  */
 int crtpSendPacketBlock(CRTPPacket *p);
 
 /**
- * Fetch a packet with a specidied task ID.
+ * 使用指定的端口获取数据包。
  *
- * @param[in]  taskId The id of the CRTP task
- * @param[out] p      The CRTP Packet with infomation (unchanged if nothing to fetch)
+ * @param[in]  portId CRTP端口ID
+ * @param[out] p      包含信息的CRTP数据包（如果没有可获取的数据包，则不变）
  *
- * @returns status of fetch from queue
+ * @returns 从队列中获取的状态
  */
-int crtpReceivePacket(CRTPPort taskId, CRTPPacket *p);
+int crtpReceivePacket(CRTPPort portId, CRTPPacket *p);
 
 /**
- * Fetch a packet with a specidied task ID. Wait some time befor giving up
+ * 使用指定的端口ID获取数据包。
  *
- * @param[in]  taskId The id of the CRTP task
- * @param[out] p      The CRTP Packet with infomation (unchanged if nothing to fetch)
- * @param[in] wait    Wait time in milisecond
+ * @param[in]  portId CRTP数据端口
+ * @param[out] p      包含信息的CRTP数据包（如果没有可获取的数据包，则不变）
+ * @param[in] wait    等待时间（毫秒）
  *
- * @returns status of fetch from queue
+ * @returns 从队列中获取的状态
  */
-int crtpReceivePacketWait(CRTPPort taskId, CRTPPacket *p, int wait);
+int crtpReceivePacketWait(CRTPPort portId, CRTPPacket *p, int wait);
 
 /**
- * Get the number of free tx packets in the queue
+ * 获取队列中TX数据包数量
  *
- * @return Number of free packets
+ * @return 数据包的数量
  */
 int crtpGetFreeTxQueuePackets(void);
 
 /**
- * Wait for a packet to arrive for the specified taskID
+ * 等待指定任务ID的数据包到达
  *
- * @param[in]  taskId The id of the CRTP task
- * @paran[out] p      The CRTP Packet with information
+ * @param[in]  taskId CRTP任务的ID
+ * @paran[out] p      包含信息的数据包
  *
- * @return status of fetch from queue
+ * @return 从队列中获取的状态
  */
 int crtpReceivePacketBlock(CRTPPort taskId, CRTPPacket *p);
 
 /**
- * Function pointer structure to be filled by the CRTP link to permits CRTP to
- * use manu link
+ * 函数指针结构，由CRTP链接填充以允许CRTP使用多种链接
  */
 struct crtpLinkOperations
 {
@@ -179,18 +168,17 @@ struct crtpLinkOperations
 void crtpSetLink(struct crtpLinkOperations *lk);
 
 /**
- * Check if the connection timeout has been reached, otherwise
- * we will assume that we are connected.
+ * 检查连接超时是否已达到，否则
+ * 我们将假设我们已连接。
  *
- * @return true if conencted, otherwise false
+ * @return 如果连接，则为true，否则为false
  */
 bool crtpIsConnected(void);
 
 /**
- * Reset the CRTP communication by flushing all the queues that
- * contain packages.
+ * 通过刷新包含包的所有队列来重置CRTP通信。
  *
- * @return 0 for success
+ * @return 成功返回0
  */
 int crtpReset(void);
 
