@@ -147,7 +147,7 @@ int crtpGetFreeTxQueuePackets(void);
  * 等待指定任务ID的数据包到达
  *
  * @param[in]  taskId CRTP任务的ID
- * @paran[out] p      包含信息的数据包
+ * @param[out] p      包含信息的数据包
  *
  * @return 从队列中获取的状态
  */
