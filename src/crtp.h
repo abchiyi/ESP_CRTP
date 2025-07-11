@@ -73,6 +73,35 @@ typedef struct _CRTPPacket
   };
 } __attribute__((packed)) CRTPPacket;
 
+typedef struct
+{
+  union
+  {
+
+    struct _data_t
+    {
+      struct
+      {
+        float ROLL;
+        float PITCH;
+        float YAW;
+        uint16_t THRUST;
+      };
+      union
+      {
+        struct
+        {
+          bool breaker : 1;
+        };
+        uint8_t raw[1];
+      };
+
+    } __attribute((packed)) data;
+
+    uint8_t raw[sizeof(_data_t)];
+  };
+} __attribute((packed)) packet_setpoint_t;
+
 typedef void (*CrtpCallback)(CRTPPacket *);
 
 /**
