@@ -78,7 +78,7 @@ typedef struct
   union
   {
 
-    struct _data_t
+    struct
     {
       struct
       {
@@ -95,10 +95,9 @@ typedef struct
         };
         uint8_t raw[1];
       };
+    };
 
-    } __attribute((packed)) data;
-
-    uint8_t raw[sizeof(_data_t)];
+    // uint8_t raw[30];
   };
 } __attribute((packed)) packet_setpoint_t;
 
