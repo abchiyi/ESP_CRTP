@@ -92,6 +92,7 @@ typedef struct
         struct
         {
           bool breaker : 1;
+          bool reverse : 1; // 反转推力
         };
         uint8_t raw[1];
       };
