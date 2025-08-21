@@ -86,13 +86,13 @@ typedef struct
         float PITCH;
         float YAW;
         uint16_t THRUST;
+        uint16_t REVERSE;
       };
       union
       {
         struct
         {
           bool breaker : 1;
-          bool reverse : 1; // 反转推力
         };
         uint8_t raw[1];
       };
